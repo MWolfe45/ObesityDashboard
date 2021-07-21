@@ -4,16 +4,16 @@ Contains code for interactive data visualizations and model-based policy recomme
 🤘 Getting Started 🤘
 
 Install dependencies:
-*Plotly
-*Dash
-*numpy
-*matplotlib
-*scikig-learn
-*statsmodels
-*seaborn
-*urlopen
-*urllib3
-*pingouin
+* Plotly
+* Dash
+* numpy
+* matplotlib
+* scikig-learn
+* statsmodels
+* seaborn
+* urlopen
+* urllib3
+* pingouin
 
 Choose a directory on your computer, open git-bash.
 
