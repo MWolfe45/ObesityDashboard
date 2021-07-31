@@ -25,7 +25,7 @@ with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-c
 df = pd.read_csv('data/eda_dataframe.csv')
 
 #Define histogram figure
-figdis = px.histogram(df, x=df['obesity_rate'],marginal='rug', hover_data=df.columns,color_discrete_sequence=['DarkTurquoise'])
+figdis = px.histogram(df, x=df['obesity_rate'],marginal='rug', hover_data=df.columns,color_discrete_sequence=['Plum'])
 figdis.update_layout(paper_bgcolor='rgba(0,0,0,0)',
                       plot_bgcolor='rgba(0,0,0,0)',
                       template = "seaborn",

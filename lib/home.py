@@ -7,6 +7,20 @@ sys.path.append("..")
 
 from app import app
 
+link_deck = dbc.CardDeck([
+dbc.Card(children=[
+    html.H3(children='Get the original datasets used in this dashboard', className="text-center"),
+    dbc.Button("Food Environment Atlas", href="https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/", color="primary", block=True), 
+    dbc.Button("Map the Meal Gap", href="https://www.feedingamerica.org/research/map-the-meal-gap/how-we-got-the-map-data", color="primary", block=True)], body=True, color="dark", outline=True),
+
+dbc.Card(children=[
+    html.H3(children='Access the code used to build this dashboard', className="text-center"), 
+    dbc.Button("GitHub", href="https://github.com/Shevaughnth/team_115", color="primary", className="mt-3"),
+                                       ], body=True, color="dark", outline=True)
+]
+)
+
+
 
 layout = html.Div([
     dbc.Container([
@@ -23,14 +37,6 @@ layout = html.Div([
                                      "Tool, which uses these insights to develop a predictive model and allows users to explore recommendations for their specific population."), className="mb-5")
         ]),
 
-        dbc.Row([
-            dbc.Col(dbc.Card(children=[html.H3(children='Get the original datasets used in this dashboard',
-                                               className="text-center"),
-                dbc.Row([dbc.Col(dbc.Button("Food Environment Atlas", href="https://www.ers.usda.gov/data-products/food-environment-atlas/data-access-and-documentation-downloads/", color="primary", block=True), className="mt-3"), 
-                     dbc.Col(dbc.Button("Map the Meal Gap", href="https://www.feedingamerica.org/research/map-the-meal-gap/how-we-got-the-map-data", color="primary", block=True), className="mt-3")], justify="center")], body=True, color="dark", outline=True), width={'size':6, 'offset':12}, className="mb-4"), 
-        
-        dbc.Col(dbc.Card(children=[html.H3(children='Access the code used to build this dashboard', className="text-center"), dbc.Button("GitHub", href="https://github.com/Shevaughnth/team_115", color="primary", className="mt-3"),
-                                       ], body=True, color="dark", outline=True), width={'size':6, 'offset':12}, className="mb-4"),
-        ], className="mb-5")
+        dbc.Row(link_deck)
     ])
 ])
