@@ -18,8 +18,7 @@ layout = html.Div([
         ]),
         
         dbc.Row([
-            dbc.Col(html.H5(children='It consists of two main pages: EDA, which shows the insights gained through our exploratory analysis, and '
-                                     "Tool, which uses these insights to develop a predictive model and allows users to explore recommendations for their specific population."), className="mb-5")
+            dbc.Col(html.H5(children="To operate, please choose your specific US county from the dropdown menu. The variable fields will be populated with your county's specifc figures, which you can then alter to predict the effects of implemented changes."), className="mb-5")
         ]),
         
         dbc.Row(
