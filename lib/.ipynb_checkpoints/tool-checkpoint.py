@@ -22,6 +22,12 @@ from app import app
 from model import lin_reg
 from constants import states_dicts, county_dicts, county_select, obesity_df
 
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+server = app.server
+
 layout = html.Div([
     dbc.Container([
         dbc.Row([
