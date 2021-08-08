@@ -61,18 +61,10 @@ obesity_df['class_category'] = obesity_df['class_category'].map({'low_income':1,
 
 
 
-pot_vars = obesity_df[['grocery_per1000', 'super_per1000',
-       'convenience_per1000', 'specialty_per1000', 
-       'fast_food_per1000', 'full_service_per1000', 'school_lunch_prog_17',
-       'percent_no_car', 'total_unemployment_rate_over_16','pct_fm_accept_wic', 'pct_fm_credit', 
-       'pct_fm_sell_frveg']]
-
-
 # code was modeled and influenced by DS4A (Correlation One) material. 
 formula= 'obesity_rate ~ super_per1000 + convenience_per1000 + specialty_per1000 + pct_fm_accepting_snap + pct_fm_credit + fast_food_per1000 + full_service_per1000 + pop_estimate + percent_no_car + total_unemployment_rate_over_16'
 model_final = sm.ols(formula = formula, data = obesity_df)
 lin_reg = model_final.fit()
-# print(lin_reg.summary())
 
 
 # obtain user input to put into a new dataframe that we will then use to predict obesity rates
@@ -91,10 +83,6 @@ lin_reg = model_final.fit()
 
 
 # we then create a new dataframe with the variables above so we can input it into the model prediction
-# new_vals = pd.DataFrame({'super_per1000': [super_input], 'convenience_per1000': [convenience_store],'specialty_per1000': [specialty_store], 'pct_fm_accepting_snap': [fm_snap],'pct_fm_credit': [fm_credit], 'fast_food_per1000': [fast_food], 'full_service_per1000': [restaurant], 'pop_estimate': [population],'percent_no_car': [no_car], 'total_unemployment_rate_over_16': [unemployment]})
 
 
-# the new variables are put into the new model and then the second value is the predicted obesity in the county based upon changes
-# xnew = sma.add_constant(new_vals)
-# ynewpred =  lin_reg.predict(xnew)
-# ynewpred
+

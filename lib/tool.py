@@ -6,6 +6,18 @@ from dash.dependencies import Input, Output, State
 import sys
 sys.path.append("..")
 
+import numpy as np
+import pandas as pd
+import statsmodels.formula.api as sm
+import statsmodels.api as sma
+import sklearn
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from sklearn import model_selection
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, LogisticRegression
+from sklearn.model_selection import train_test_split, cross_val_score, cross_validate, KFold, GridSearchCV, ShuffleSplit
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.pipeline import Pipeline
+
 from app import app
 from model import lin_reg
 from constants import states_dicts, county_dicts, county_select, obesity_df
@@ -38,10 +50,7 @@ layout = html.Div([
             [dbc.Col(html.Label('Superstores per 1000: ')),
             dbc.Col(html.Div(id='superstore_var'))]
         ),
-        dbc.Row(
-            [dbc.Col(html.Label('Grocery Stores per 1000: ')),
-            dbc.Col(html.Div(id='grocery_var'))]
-        ),
+        
         dbc.Row(
             [dbc.Col(html.Label('Convenience Stores per 1000: ')),
             dbc.Col(html.Div(id='convenience_var'))]
@@ -58,38 +67,62 @@ layout = html.Div([
             [dbc.Col(html.Label('Full Service Restaurants per 1000: ')),
             dbc.Col(html.Div(id='full_var'))]
         ),
-        dbc.Row(
-            [dbc.Col(html.Label('School Lunch Programs: ')),
-            dbc.Col(html.Div(id='lunch_var'))]
-        ),
+
         dbc.Row(
             [dbc.Col(html.Label('Percent Without Car Access: ')),
             dbc.Col(html.Div(id='no_car_var'))]
         ),
-        dbc.Row(
-            [dbc.Col(html.Label('Percent of Farmers Markets that Accept WIC: ')),
-            dbc.Col(html.Div(id='farm_wic_var'))]
-        ),
-        dbc.Row(
-            [dbc.Col(html.Label('Percent of Farmers Market that Accept Credit: ')),
-            dbc.Col(html.Div(id='farm_cred_var'))]
-        ),
-        dbc.Row(
-            [dbc.Col(html.Label('Percent of Farmers Markets that Sell Fresh Vegetables: ')),
-            dbc.Col(html.Div(id='farm_veg_var'))]
-        ),
             
         dbc.Row(
-            [dbc.Col(html.Label('Total Unemployment: ')),
-            dbc.Col(html.Div(id='unem_var'))]
-        )
-        ], style={'margin-top':'25px'})),
-        dbc.Col(
-            [dbc.Row(dbc.Card([html.Label('Actual Obesity Rate: '),html.Div(id='obesity_actual')], style={'margin-top':'25px', 'width':'600px'})),
-            dbc.Row(dbc.Card())
-            ])
+        [dbc.Col(html.Label('Percent of Farmers Markets that Accept Snap: ')),
+        dbc.Col(html.Div(id='pct_fm_accepting_snap'))]
+        ),    
+        
+        dbc.Row(
+        [dbc.Col(html.Label('Population Estimate: ')),
+        dbc.Col(html.Div(id='pop_estimate'))]
+        ),
                 
-                ])
+        dbc.Row(
+            [dbc.Col(html.Label('Percent of Farmers Market that Accept Credit: ')),
+            dbc.Col(html.Div(id='farm_cred_var'))]),
+
+        dbc.Row(
+            [dbc.Col(html.Label('Total Unemployment: ')),
+            dbc.Col(html.Div(id='unem_var'))])
+        ], style={'margin-top':'25px'})),
+        
+                 
+        dbc.Col(dbc.Card([
+            dbc.Row(
+            [dbc.Col(html.Label('New value for superstores: ')),
+            dbc.Col(dcc.Input(id='supercenters_var_input'))]),
+            dbc.Row([dbc.Col(html.Label('New value for convenince stores: ')),
+            dbc.Col(dcc.Input(id='convenience_var_input'))]),
+            dbc.Row([dbc.Col(html.Label('New value for specialty stores: ')),
+            dbc.Col(dcc.Input(id='specialty_var_input'))]),
+            dbc.Row([dbc.Col(html.Label('New value for fast food: ')),
+            dbc.Col(dcc.Input(id='fast_var_input'))]),
+            dbc.Row([dbc.Col(html.Label('New value for full service restaurants: ')),
+            dbc.Col(dcc.Input(id='full_var_input'))]),
+            dbc.Row([dbc.Col(html.Label('New value for percent without car: ')),
+            dbc.Col(dcc.Input(id='no_car_var_input'))]),
+            dbc.Row([dbc.Col(html.Label('New value for percent of farmers markets that accept snap: ')),
+            dbc.Col(dcc.Input(id='farm_snap_var_input'))]),
+            dbc.Row([dbc.Col(html.Label('New value for percent of farmers markets that accept credit: ')),
+            dbc.Col(dcc.Input(id='farm_credit_var_input'))]),
+            dbc.Row([dbc.Col(html.Label('New value for unemployment: ')),
+            dbc.Col(dcc.Input(id='unem_var_input'))]),
+        
+                
+        ]), style={'margin-top':'25px'})
+                
+                ]),
+        dbc.Row([
+            dbc.Col(dbc.Card([html.Label('Actual Obesity Rate: '),html.Div(id='obesity_actual')], style={'margin-top':'25px'})),
+            dbc.Col(dbc.Card([html.Label('Predicted Obesity Rate Given New Values: '), html.Div(id='obesity_predicted')], style={'margin-top':'30px'}))
+
+        ])
     ])
 ])
 
@@ -167,29 +200,27 @@ def show_fips(county, state):
 
 @app.callback(Output('obesity_actual', 'children'),
               Output('superstore_var', 'children'),
-              Output('grocery_var', 'children'),
               Output('convenience_var', 'children'),
               Output('specialty_var', 'children'),
               Output('fast_var', 'children'),
               Output('full_var', 'children'),
-              Output('lunch_var', 'children'),
               Output('no_car_var', 'children'),
-              Output('farm_wic_var', 'children'),
               Output('farm_cred_var', 'children'),
-              Output('farm_veg_var', 'children'),
               Output('unem_var', 'children'),
+              Output('pct_fm_accepting_snap', 'children'),
+              Output('pop_estimate', 'children'),
+              
              Input('fips-output-container', 'children'))
 
-def update_superstore(fips):
+def update_actuals(fips):
     new_df = obesity_df.copy()
     new_df = new_df[new_df['fips']==fips]
     superstore_df = new_df['super_per1000']
     if new_df.empty:
-        return '','','','','','','','','','','','',''
+        return '','','','','','','','','','',''
 
     superstore_var = superstore_df.iloc[0]
-    grocery_df = new_df['grocery_per1000']
-    grocery_var = grocery_df.iloc[0]
+
    
     convenience_df = new_df['convenience_per1000']
     convenience_var = convenience_df.iloc[0]
@@ -203,27 +234,45 @@ def update_superstore(fips):
     full_df = new_df['full_service_per1000']
     full_var = full_df.iloc[0]
     
-    lunch_df = new_df['school_lunch_prog_17']
-    lunch_var = lunch_df.iloc[0]
-    
     no_car_df = new_df['percent_no_car']
     no_car_var = no_car_df.iloc[0]
-    
-    farm_wic_df = new_df['pct_fm_accept_wic']
-    farm_wic_var = farm_wic_df.iloc[0]
     
     farm_cred_df = new_df['pct_fm_credit']
     farm_cred_var = farm_cred_df.iloc[0]
    
-    farm_veg_df = new_df['pct_fm_sell_frveg']
-    farm_veg_var = farm_veg_df.iloc[0]
+    pop_df = new_df['pop_estimate']
+    pop_var = pop_df.iloc[0]
+    
+    fm_snap_df = new_df['pct_fm_accepting_snap']
+    fm_snap_var = fm_snap_df.iloc[0]
     
     unem_df = new_df['total_unemployment_rate_over_16']
     unem_var = unem_df.iloc[0]
     
     ob_df = new_df['obesity_rate']
     ob_var = ob_df.iloc[0]
-    return ob_var, superstore_var, grocery_var, convenience_var, specialty_var, fast_var, full_var, lunch_var, no_car_var, farm_wic_var, farm_cred_var, farm_veg_var, unem_var
+    return ob_var, superstore_var, convenience_var, specialty_var, fast_var, full_var, no_car_var, farm_cred_var, unem_var, fm_snap_var, pop_var
 
 
-        
+@app.callback(Output('obesity_predicted', 'children'),
+             [Input('supercenters_var_input', 'value'),
+             Input('convenience_var_input', 'value'),
+             Input('specialty_var_input', 'value'),
+             Input('fast_var_input', 'value'),
+             Input('full_var_input', 'value'),
+             Input('no_car_var_input', 'value'),
+             Input('farm_snap_var_input', 'value'),
+             Input('farm_credit_var_input', 'value'),
+             Input('unem_var_input', 'value'),
+             Input('pop_estimate', 'children')])
+
+def predict_obesity(supercenters, convenience, specialty, fast, full, no_car, farm_snap, farm_credit, unem_var, population):
+#     print('before ', supercenters)
+    new_vals = pd.DataFrame({'super_per1000': [supercenters], 'convenience_per1000': [convenience],'specialty_per1000': [specialty],    'pct_fm_accepting_snap': [farm_snap],'pct_fm_credit': [farm_credit], 'fast_food_per1000': [fast], 'full_service_per1000': [full],        'pop_estimate': [population],'percent_no_car': [no_car], 'total_unemployment_rate_over_16': [unem_var]})
+#     print('after ', supercenters)
+#     xnew = sma.add_constant(new_vals)
+    print(new_vals)
+    ynewpred =  lin_reg.predict(new_vals, transform=False)
+    predicted = ynewpred[0] 
+    print('pred ', predicted)
+    return predicted
