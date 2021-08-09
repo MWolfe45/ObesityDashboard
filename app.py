@@ -10,6 +10,8 @@ import dash_bootstrap_components as dbc
 
 import os
 
+from app import app, server
+
 app = dash.Dash(__name__, external_stylesheets = [dbc.themes.SANDSTONE], update_title='Loading...')
 server = app.server
 
