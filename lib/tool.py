@@ -22,12 +22,6 @@ from app import app
 from model import lin_reg
 from constants import states_dicts, county_dicts, county_select, obesity_df
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-server = app.server
-
 layout = html.Div([
     dbc.Container([
         dbc.Row([
@@ -284,5 +278,3 @@ def predict_obesity(clicks, supercenters, convenience, specialty, fast, full, no
 
         return ynewpred
     
-if __name__ == '__main__':
-    app.run_server(debug=True)
