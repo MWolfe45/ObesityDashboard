@@ -20,10 +20,15 @@ import pandas as pd
 import json
 
 # Recall app
-from app import app
+from app import app, server
 
 from lib import home, exploratory, references, team_bio, tool
 
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+server = app.server
 
 ################
 # NAVIGATION BAR

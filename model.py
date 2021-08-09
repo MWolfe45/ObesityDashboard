@@ -84,5 +84,3 @@ lin_reg = model_final.fit()
 
 # we then create a new dataframe with the variables above so we can input it into the model prediction
 
-
-
