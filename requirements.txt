@@ -19,3 +19,4 @@ pandas
 dash_bootstrap_components
 matplotlib
 sklearn
+statsmodels
