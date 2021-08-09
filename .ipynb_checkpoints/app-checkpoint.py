@@ -10,8 +10,6 @@ import dash_bootstrap_components as dbc
 
 import os
 
-from app import app, server
-
 app = dash.Dash(__name__, external_stylesheets = [dbc.themes.SANDSTONE], update_title='Loading...')
 server = app.server
 
@@ -26,6 +24,3 @@ if workspace_user:
 
 # We need this for function callbacks not present in the app.layout
 app.config.suppress_callback_exceptions = True
-
-if __name__ == '__main__':
-    app.run_server(debug=True)
