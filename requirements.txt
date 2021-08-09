@@ -16,3 +16,6 @@ six==1.16.0
 tenacity==8.0.1
 Werkzeug==2.0.1
 dash_bootstrap_components
+plotly
+matplotlib
+sklearn
